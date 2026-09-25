@@ -44,6 +44,7 @@ const EnvSchema = z.object({
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
   MAX_BODY_BYTES: z.coerce.number().int().min(1024).max(4 * 1024 * 1024).default(64 * 1024),
   METRICS_TOKEN: z.string().min(16).optional(),
+  OPENAI_APPS_CHALLENGE_TOKEN: z.string().regex(/^[A-Za-z0-9._~-]{8,512}$/).optional(),
   ALLOW_INSECURE_HTTP: bool,
 });
 
@@ -70,6 +71,8 @@ export interface AppConfig {
   trustProxyHops: number;
   maxBodyBytes: number;
   metricsToken: string | undefined;
+  /** Token da verificação de domínio da OpenAI (publicação no diretório do ChatGPT). */
+  openaiChallengeToken: string | undefined;
   scopes: string[];
   version: string;
 }
@@ -132,6 +135,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, version = '1.0.
     trustProxyHops: e.TRUST_PROXY_HOPS,
     maxBodyBytes: e.MAX_BODY_BYTES,
     metricsToken: e.METRICS_TOKEN,
+    openaiChallengeToken: e.OPENAI_APPS_CHALLENGE_TOKEN,
     scopes: [...SCOPES],
     version,
   };

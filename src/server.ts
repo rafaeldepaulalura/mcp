@@ -102,6 +102,16 @@ export function createHttpServer(deps: ServerDeps): Server {
       sendJson(res, 405, { error: 'method_not_allowed' }, { Allow: 'GET, OPTIONS' });
       return;
     }
+    if (path === '/.well-known/openai-apps-challenge') {
+      if (config.openaiChallengeToken) {
+        const body = config.openaiChallengeToken;
+        res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': String(Buffer.byteLength(body)), 'Cache-Control': 'no-store' });
+        res.end(req.method === 'HEAD' ? undefined : body);
+        return;
+      }
+      sendJson(res, 404, { error: 'not_found' });
+      return;
+    }
     if (path.startsWith('/.well-known/oauth-protected-resource')) {
       const doc = protectedResourceMetadata(config, path);
       if (doc) {

@@ -276,6 +276,25 @@ describe('servidor MCP (HTTP real + WordPress falso)', () => {
   });
 });
 
+describe('verificação de domínio OpenAI', () => {
+  it('serve o token em texto puro quando configurado, 404 sem ele', async () => {
+    const wp = await startFakeWp(key, () => ({ status: 200, body: {} }));
+    const app = buildApp(testConfig(wp.url, { OPENAI_APPS_CHALLENGE_TOKEN: 'abc123_TOKEN-xyz' }), silentLogger);
+    const base = await listen(app.server);
+    const res = await fetch(`${base}/.well-known/openai-apps-challenge`);
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe('abc123_TOKEN-xyz');
+    await close(app.server);
+    await app.mcp.close();
+    const bare = buildApp(testConfig(wp.url), silentLogger);
+    const bareBase = await listen(bare.server);
+    expect((await fetch(`${bareBase}/.well-known/openai-apps-challenge`)).status).toBe(404);
+    await close(bare.server);
+    await bare.mcp.close();
+    await close(wp.server);
+  });
+});
+
 describe('limite por conexão', () => {
   it('estoura com 429 e Retry-After', async () => {
     const wp = await startFakeWp(key, () => ({ status: 200, body: SEARCH_RESULT }));
