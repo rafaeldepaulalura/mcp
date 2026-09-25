@@ -15,6 +15,7 @@ export function registerTenderItems(server: McpServer, deps: ToolDeps): void {
       inputSchema: TenderItemsInput,
       outputSchema: TenderItemsOutput,
       annotations: { title: 'Itens da licitação', ...READ_ONLY },
+      icons: deps.icons,
       scopeChallenge: requireScopes('lp.items.read'),
     },
     async ({ tender_id, page, limit }, ctx) =>

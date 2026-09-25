@@ -20,9 +20,21 @@ export const SERVER_INSTRUCTIONS = [
   'Somente leitura: estas ferramentas não alteram conta, assinatura, CRM nem favoritos.',
 ].join(' ');
 
+/** Logo servido pelo próprio MCP (clientes exibem no conector e em cada ferramenta). */
+export function iconsFor(config: AppConfig) {
+  return [{ src: `${config.publicUrl}/icon.png`, mimeType: 'image/png', sizes: ['500x500'] }];
+}
+
 export function buildServer(deps: ToolDeps, config: AppConfig): McpServer {
   const server = new McpServer(
-    { name: 'licitante-prime', title: 'Licitante Prime', version: config.version, websiteUrl: config.issuer },
+    {
+      name: 'licitante-prime',
+      title: 'Licitante Prime',
+      version: config.version,
+      websiteUrl: config.issuer,
+      description: 'Pesquisa de licitações públicas do Brasil na base do Licitante Prime.',
+      icons: iconsFor(config),
+    },
     {
       instructions: SERVER_INSTRUCTIONS,
       capabilities: { tools: {} },
@@ -30,10 +42,11 @@ export function buildServer(deps: ToolDeps, config: AppConfig): McpServer {
     },
   );
   // Ordem determinística (a spec 2026-07-28 pede, e ajuda o cache de prompt dos clientes).
-  registerSearchTenders(server, deps);
-  registerTenderDetails(server, deps);
-  registerTenderItems(server, deps);
-  registerProfile(server, deps);
+  const toolDeps = { ...deps, icons: iconsFor(config) };
+  registerSearchTenders(server, toolDeps);
+  registerTenderDetails(server, toolDeps);
+  registerTenderItems(server, toolDeps);
+  registerProfile(server, toolDeps);
   return server;
 }
 

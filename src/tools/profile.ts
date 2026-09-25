@@ -12,6 +12,7 @@ export function registerProfile(server: McpServer, deps: ToolDeps): void {
         'Use quando o usuário perguntar se está conectado, qual o plano, ou quando outra ferramenta devolver erro de acesso. Não traz dados sensíveis.',
       outputSchema: ProfileOutput,
       annotations: { title: 'Meu perfil', ...READ_ONLY },
+      icons: deps.icons,
       scopeChallenge: requireScopes('lp.profile.read'),
     },
     async (ctx) => runTool('meu_perfil', deps, ctx, (call) => deps.api.profile(call)),

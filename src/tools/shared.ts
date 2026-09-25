@@ -8,6 +8,7 @@ export interface ToolDeps {
   api: LicitantePrimeApi;
   logger: Logger;
   metrics: Metrics;
+  icons?: Array<{ src: string; mimeType?: string; sizes?: string[] }>;
 }
 
 /** Dicas de comportamento comuns às quatro ferramentas (MCP tool annotations). */

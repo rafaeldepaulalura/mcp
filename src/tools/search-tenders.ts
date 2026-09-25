@@ -19,6 +19,7 @@ export function registerSearchTenders(server: McpServer, deps: ToolDeps): void {
       inputSchema: SearchInput,
       outputSchema: SearchOutput,
       annotations: { title: 'Buscar licitações', ...READ_ONLY },
+      icons: deps.icons,
       scopeChallenge: requireScopes('lp.tenders.search'),
     },
     async (args, ctx) =>

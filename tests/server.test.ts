@@ -260,6 +260,17 @@ describe('servidor MCP (HTTP real + WordPress falso)', () => {
     expect(list.result.tools).toHaveLength(4);
   });
 
+  it('logo do Licitante Prime em /icon.png, no serverInfo e nas ferramentas', async () => {
+    const img = await fetch(`${base}/icon.png`);
+    expect(img.status).toBe(200);
+    expect(img.headers.get('content-type')).toBe('image/png');
+    expect((await fetch(`${base}/favicon.ico`)).status).toBe(200);
+    const init = await readRpc(await rpc(base, token, 'initialize', INITIALIZE_PARAMS));
+    expect(init.result.serverInfo.icons[0].src).toBe(`${config.publicUrl}/icon.png`);
+    const list = await readRpc(await rpc(base, token, 'tools/list'));
+    expect(list.result.tools.every((t: any) => t.icons?.[0]?.src.endsWith('/icon.png'))).toBe(true);
+  });
+
   it('/metrics exige token', async () => {
     expect((await fetch(`${base}/metrics`)).status).toBe(404);
   });

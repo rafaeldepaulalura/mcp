@@ -1,4 +1,5 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { readFileSync } from 'node:fs';
 import { timingSafeEqual } from 'node:crypto';
 import { validateHostHeader, type AuthInfo, type McpHttpHandler } from '@modelcontextprotocol/server';
 import { toNodeHandler } from '@modelcontextprotocol/node';
@@ -26,6 +27,15 @@ export interface ServerDeps {
   api: LicitantePrimeApi;
   asMirror: AuthorizationServerMetadataMirror;
   mcp: McpHttpHandler;
+}
+
+/** Logo do Licitante Prime (public/icon.png), servido em /icon.png e /favicon.ico. */
+function loadIcon(): Buffer | null {
+  try {
+    return readFileSync(new URL('../public/icon.png', import.meta.url));
+  } catch {
+    return null;
+  }
 }
 
 const CORS_ALLOW_HEADERS = 'Authorization, Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id, Mcp-Method, Mcp-Name, Last-Event-ID';
@@ -68,6 +78,7 @@ export function createHttpServer(deps: ServerDeps): Server {
   const tokenLimiter = new FixedWindowLimiter(config.rateLimitPerMinute);
   const allowedHosts = config.env === 'production' ? config.allowedHosts : [...config.allowedHosts, 'localhost', '127.0.0.1', '[::1]'];
 
+  const icon = loadIcon();
   let readyCache: { at: number; body: Record<string, unknown>; ok: boolean } | null = null;
 
   const ready = async (res: ServerResponse): Promise<void> => {
@@ -203,6 +214,9 @@ export function createHttpServer(deps: ServerDeps): Server {
     const route = async (): Promise<void> => {
       if (path === '/health') {
         sendJson(res, 200, { status: 'ok' });
+      } else if ((path === '/icon.png' || path === '/favicon.ico' || path === '/favicon.png') && icon) {
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': String(icon.length), 'Cache-Control': 'public, max-age=86400', 'Access-Control-Allow-Origin': '*' });
+        res.end(req.method === 'HEAD' ? undefined : icon);
       } else if (path === '/ready') {
         await ready(res);
       } else if (path.startsWith('/.well-known/')) {

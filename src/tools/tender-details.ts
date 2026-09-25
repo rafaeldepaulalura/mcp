@@ -15,6 +15,7 @@ export function registerTenderDetails(server: McpServer, deps: ToolDeps): void {
       inputSchema: TenderDetailsInput,
       outputSchema: TenderDetailsOutput,
       annotations: { title: 'Detalhes da licitação', ...READ_ONLY },
+      icons: deps.icons,
       scopeChallenge: requireScopes('lp.tenders.read'),
     },
     async ({ id }, ctx) => runTool('detalhes_licitacao', deps, ctx, (call) => deps.api.tender(call, String(id))),
