@@ -1,0 +1,15 @@
+# Execução local do servidor MCP apontando para um WordPress já existente.
+# Para o ambiente completo de teste (WordPress + MariaDB + Meilisearch) veja ../dev/.
+services:
+  mcp:
+    build: .
+    image: licitante-prime-mcp:local
+    env_file: .env
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
